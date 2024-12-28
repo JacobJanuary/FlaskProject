@@ -141,7 +141,7 @@ function sortTable(n, type) {
                     </div>
                 </td>
                 <td><a href="https://coinmarketcap.com/currencies/{{ crypto.name|lower|replace(' ', '-') }}" target="_blank">Ссылка</a></td>
-                <td><button onclick="showAIAnalytics()">AI Аналитика</button></td>
+                <td><button onclick="showAIAnalytics('{{ crypto.name }}', '{{ crypto.symbol }}')">AI Аналитика</button></td>
                 <td><button onclick="showAIFunds()">AI Фонды</button></td>
             </tr>
             {% endfor %}

@@ -18,13 +18,19 @@ function showAIAnalytics(name, symbol) {
         })
         .then(response => response.json())
         .then(data => {
-          if (data.error) {
-              alert('Ошибка получения аналитики: ' + data.error);
-          } else {
-              // Отображение в более удобном формате (например, в модальном окне)
-              let analyticsText = data.choices[0].message.content;
-              alert(analyticsText); // Замените на модальное окно
-          }
+            if (data.error) {
+                alert('Ошибка получения аналитики: ' + data.error);
+            } else {
+                // Отображение в модальном окне (пример)
+                let modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                    background-color: white; padding: 20px; border: 1px solid black;
+                    max-height: 80vh; overflow-y: auto; z-index: 1000;
+                `;
+                modal.innerHTML = `<h3>Аналитика по ${name} (${symbol})</h3><pre>${data.content}</pre><button onclick="this.parentNode.remove()">Закрыть</button>`;
+                document.body.appendChild(modal);
+            }
         })
         .catch((error) => {
             console.error('Error:', error);

@@ -1,24 +1,27 @@
+import traceback
+
 from flask import Flask, render_template
 import sqlite3
-import requests
-import os
-from openai import OpenAI
+from anthropic import Anthropic
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
+
 
 def format_volume(volume):
     if volume is not None:
         return f"{volume / 1000000:.2f} млн"
     return "N/A"
 
+
 def format_price(price):
     if price is not None:
         return f"{price:.2f}"
     return "N/A"
 
-#XAI_API_KEY = "xai-AEbygKMNvz46KLqCszO6UEp3RDpc0DyWmwLpwOnNlM18BWF0rUwuHGPVSUykOxAyRuGKoT48IzCOSvvm" # Получаем ключ из переменной окружения
-#GROK_API_URL = "https://api.x.ai/v1"
+
+XAI_API_KEY = "xai-AEbygKMNvz46KLqCszO6UEp3RDpc0DyWmwLpwOnNlM18BWF0rUwuHGPVSUykOxAyRuGKoT48IzCOSvvm" # Получаем ключ из переменной окружения
+# GROK_API_URL = "https://api.x.ai/v1"
 
 def get_grok_analytics(name, symbol):
     if not XAI_API_KEY:
@@ -26,30 +29,20 @@ def get_grok_analytics(name, symbol):
         return {"error": "API ключ не установлен"}
 
     try:
+        client = Anthropic(api_key=XAI_API_KEY, base_url="https://api.x.ai")
+        prompt = f"дай подробную информацию о проекте {name} ({symbol}). Что он делает, когда создан, кто в команде, какие перспективы, развитие, социальная активность. Заходили ли в проект умные деньги, какие твои прогнозы по курсу токена на 2025 год"
 
-        client = OpenAI(
-            api_key="xai-AEbygKMNvz46KLqCszO6UEp3RDpc0DyWmwLpwOnNlM18BWF0rUwuHGPVSUykOxAyRuGKoT48IzCOSvvm",
-            base_url="https://api.x.ai/v1",
-        )
-
-        completion = client.chat.completions.create(
+        message = client.messages.create(
             model="grok-2-1212",
-            messages=[
-                {"role": "system",
-                 "content": "You are Grok, a chatbot inspired by the Hitchhikers Guide to the Galaxy."},
-                {"role": "user", "content": "дай подробную информацию о проекте {name} ({symbol}). Что он делает, когда создан, кто в команде, какие перспективы, развитие, социальная активность. Заходили ли в проект умные деньги, какие твои прогнозы по курсу токена на 2025 год"},
-            ],
+            max_tokens=128000, # Увеличил количество токенов
+            messages=[{"role": "user", "content": prompt}]
         )
 
-        response = completion.choices[0].message.content # Устанавливаем таймаут
-        return response
-    except requests.exceptions.RequestException as e:
-        print(f"Ошибка при запросе к API Grok: {e}")
-
+        return {"content": message.content} # Возвращаем только текст ответа
     except Exception as e:
-        print(f"Непредвиденная ошибка: {e}")
-        return {"error": "Непредвиденная ошибка"}
-
+        print(f"Ошибка при запросе к API Grok: {e}")
+        traceback.print_exc()  # Выводим подробный traceback
+        return {"error": str(e)}
 # ... (остальной код app.py)
 @app.route("/")
 def index():
@@ -80,13 +73,14 @@ def index():
 
                 for i in range(1, len(volume_data)):
                     prev_volume, prev_datetime = volume_data[i][1], volume_data[i][0]
-                    curr_volume, curr_datetime = volume_data[i-1][1], volume_data[i-1][0]
+                    curr_volume, curr_datetime = volume_data[i - 1][1], volume_data[i - 1][0]
 
                     if prev_volume is not None and curr_volume is not None:
                         try:
                             if curr_volume > prev_volume:
                                 periods_of_growth += 1
-                                time_diff = datetime.fromisoformat(curr_datetime) - datetime.fromisoformat(prev_datetime)
+                                time_diff = datetime.fromisoformat(curr_datetime) - datetime.fromisoformat(
+                                    prev_datetime)
                                 time_of_growth += time_diff
 
                                 increase_percentage = ((curr_volume - prev_volume) / prev_volume) * 100
@@ -100,13 +94,14 @@ def index():
                         break
 
                 if periods_of_growth > 0:
-                  average_volume_increase_percentage = total_volume_increase_percentage / periods_of_growth
+                    average_volume_increase_percentage = total_volume_increase_percentage / periods_of_growth
                 else:
-                  average_volume_increase_percentage = 0
+                    average_volume_increase_percentage = 0
 
                 if time_difference_global is None and len(volume_data) >= 2:
                     try:
-                        time_difference_global = datetime.fromisoformat(volume_data[0][0]) - datetime.fromisoformat(volume_data[1][0])
+                        time_difference_global = datetime.fromisoformat(volume_data[0][0]) - datetime.fromisoformat(
+                            volume_data[1][0])
                     except (ValueError, IndexError):
                         print(f"Некорректный формат даты или недостаточно данных для {coin_name} ({coin_symbol})")
                         time_difference_global = timedelta(0)
@@ -151,6 +146,7 @@ def index():
     finally:
         if conn:
             conn.close()
+
 
 if __name__ == "__main__":
     app.run(debug=True)

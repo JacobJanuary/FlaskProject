@@ -37,11 +37,12 @@
                 })
 .then(data => {
         if (data.error) {
+            modal.style.display = 'none'; // Скрываем модальное окно при ошибке
             alert('Ошибка: ' + data.error);
         } else {
             modalLoading.style.display = 'none';
             modalContent.style.display = 'block';
-            const modal = document.getElementById('modal');
+
             const tableContainer = document.getElementById('table-container');
             const tableRect = tableContainer.getBoundingClientRect();
 

@@ -24,6 +24,7 @@ XAI_API_KEY = "xai-AEbygKMNvz46KLqCszO6UEp3RDpc0DyWmwLpwOnNlM18BWF0rUwuHGPVSUykO
 # GROK_API_URL = "https://api.x.ai/v1"
 
 def get_grok_analytics(name, symbol):
+    XAI_API_KEY = os.environ.get("XAI_API_KEY") or "YOUR_DEFAULT_API_KEY"  # Замените на свой ключ
     if not XAI_API_KEY:
         print("Ошибка: Не установлен XAI_API_KEY")
         return {"error": "API ключ не установлен. Установите переменную окружения XAI_API_KEY."}
@@ -37,26 +38,33 @@ def get_grok_analytics(name, symbol):
             max_tokens=128000,
             messages=[{"role": "user", "content": prompt}]
         )
-        if message and hasattr(message, 'content') and isinstance(message.content,
-                                                                  list):  # проверяем что message.content именно список
-            text_blocks = message.content
-            full_text = ""
-            for block in text_blocks:
-                if hasattr(block, 'text'):
-                    full_text += block.text
-            return {"content": full_text}
-        elif message and hasattr(message, 'content') and hasattr(message.content,
-                                                                 'text'):  # если это не список, а сразу TextBlock
-            content = message.content.text
-            return {"content": content}
+
+        if message and hasattr(message, 'content'):
+            if isinstance(message.content, list):
+                text_blocks = message.content
+                full_text = ""
+                for block in text_blocks:
+                    if block and hasattr(block, 'text') and block.text: # Дополнительная проверка на None и пустую строку
+                        full_text += block.text
+                return {"content": full_text}
+            elif hasattr(message.content, 'text') and message.content.text: #проверка на случай когда пришел один TextBlock
+                content = message.content.text
+                return {"content": content}
+            else:
+                print(f"Content structure is invalid: {message.content}") # Более информативный вывод
+                return {"error": "Invalid content structure in API response"}
+        elif message is None: #проверка на случай если message is None
+            print(f"message is None")
+            return {"error": "message is None"}
         else:
-            print(f"Unexpected response structure: {message}")
-            return {"error": "Unexpected response from API"}
+            print(f"Message structure is invalid: {message}") # Более информативный вывод
+            return {"error": "Invalid message structure in API response"}
 
     except Exception as e:
         print(f"Ошибка при запросе к API Grok: {e}")
         traceback.print_exc()
-        return {"error": str(e)}
+        return {"error": f"API request failed: {e}"}
+
 
 
 @app.route("/", methods=["GET", "POST"])

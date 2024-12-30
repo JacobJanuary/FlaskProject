@@ -10,6 +10,15 @@
     </style>
     <script>
         function showAIAnalytics(name, symbol) {
+                const modal = document.getElementById('modal');
+    const modalLoading = document.getElementById('modal-loading');
+    const modalContent = document.getElementById('modal-content');
+
+    // Показываем модальное окно и индикатор загрузки
+    modal.style.display = 'block';
+    modalLoading.style.display = 'block';
+    modalContent.style.display = 'none';
+
             console.log("Запрос AI аналитики для:", name, symbol);
             fetch('/', { // Отправляем POST запрос на корень сайта
                 method: 'POST',
@@ -30,6 +39,8 @@
         if (data.error) {
             alert('Ошибка: ' + data.error);
         } else {
+            modalLoading.style.display = 'none';
+            modalContent.style.display = 'block';
             const modal = document.getElementById('modal');
             const tableContainer = document.getElementById('table-container');
             const tableRect = tableContainer.getBoundingClientRect();
@@ -187,8 +198,12 @@
 
 <div id="modal" style="display: none; position: absolute; background-color: white; padding: 20px; border: 1px solid black; overflow-y: auto; z-index: 1000;">
     <h3 id="modal-title"></h3>
-    <pre id="modal-content"></pre>
+    <div id="modal-loading" style="text-align: center;">
+        <div class="loader"></div> <p>ИИ анализирует информацию. Подождите...</p>
+    </div>
+    <div id="modal-content" style="display: none;"></div>
     <button onclick="closeModal()">Закрыть</button>
 </div>
+
 </body>
 </html>

@@ -1,6 +1,6 @@
 import traceback
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
 import sqlite3
 from anthropic import Anthropic
 from datetime import datetime, timedelta
@@ -26,7 +26,7 @@ XAI_API_KEY = "xai-AEbygKMNvz46KLqCszO6UEp3RDpc0DyWmwLpwOnNlM18BWF0rUwuHGPVSUykO
 def get_grok_analytics(name, symbol):
     if not XAI_API_KEY:
         print("Ошибка: Не установлен XAI_API_KEY")
-        return {"error": "API ключ не установлен"}
+        return {"error": "API ключ не установлен. Установите переменную окружения XAI_API_KEY."}
 
     try:
         client = Anthropic(api_key=XAI_API_KEY, base_url="https://api.x.ai")
@@ -34,17 +34,16 @@ def get_grok_analytics(name, symbol):
 
         message = client.messages.create(
             model="grok-2-1212",
-            max_tokens=128000, # Увеличил количество токенов
+            max_tokens=128000,
             messages=[{"role": "user", "content": prompt}]
         )
 
-        return {"content": message.content} # Возвращаем только текст ответа
+        return {"content": message.content}
     except Exception as e:
         print(f"Ошибка при запросе к API Grok: {e}")
-        traceback.print_exc()  # Выводим подробный traceback
+        traceback.print_exc()
         return {"error": str(e)}
-# ... (остальной код app.py)
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def index():
     try:
         conn = sqlite3.connect('cryptocurrencies.db')
@@ -138,6 +137,15 @@ def index():
                     print(f"Недостаточно данных для {coin_name} ({coin_symbol})")
             else:
                 print(f"Недостаточно данных о объемах для {coin_name} ({coin_symbol})")
+
+        if request.method == "POST":
+            name = request.form.get("name")
+            symbol = request.form.get("symbol")
+            if name and symbol:
+                analytics = get_grok_analytics(name, symbol)
+                return jsonify(analytics)
+            else:
+                return jsonify({"error": "Не переданы name или symbol"}), 400
 
         return render_template("index.html", crypto_data=crypto_data_to_display, time_difference=time_difference_global)
 

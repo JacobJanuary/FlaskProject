@@ -8,35 +8,39 @@
       /* Встроенные стили лучше убрать, чтобы избежать конфликтов */
     </style>
 <script>
-function showAIAnalytics(name, symbol) {
-        fetch('/get_ai_analytics', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'name=' + encodeURIComponent(name) + '&symbol=' + encodeURIComponent(symbol)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert('Ошибка получения аналитики: ' + data.error);
-            } else {
-                // Отображение в модальном окне (пример)
-                let modal = document.createElement('div');
-                modal.style.cssText = `
-                    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                    background-color: white; padding: 20px; border: 1px solid black;
-                    max-height: 80vh; overflow-y: auto; z-index: 1000;
-                `;
-                modal.innerHTML = `<h3>Аналитика по ${name} (${symbol})</h3><pre>${data.content}</pre><button onclick="this.parentNode.remove()">Закрыть</button>`;
-                document.body.appendChild(modal);
-            }
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            alert('Произошла ошибка при выполнении запроса.');
-        });
-    }
+        function showAIAnalytics(name, symbol) {
+            console.log("Запрос AI аналитики для:", name, symbol);
+            fetch('/', { // Отправляем POST запрос на корень сайта
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'name=' + encodeURIComponent(name) + '&symbol=' + encodeURIComponent(symbol)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {throw new Error(err.error || 'Ошибка запроса')});
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    alert('Ошибка: ' + data.error);
+                } else {
+                    document.getElementById('modal-title').textContent = `AI Аналитика для ${name} (${symbol})`;
+                    document.getElementById('modal-content').textContent = data.content;
+                    document.getElementById('modal').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка fetch:', error);
+                alert('Произошла ошибка при выполнении запроса: ' + error.message);
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
 
 function sortTable(n, type) {
   var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
@@ -151,5 +155,11 @@ function sortTable(n, type) {
     {% else %}
     <p>Нет данных о криптовалютах с ростом объема более 10%.</p>
     {% endif %}
+
+    <div id="modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border: 1px solid black; max-height: 80vh; overflow-y: auto; z-index: 1000;">
+        <h3 id="modal-title"></h3>
+        <pre id="modal-content"></pre>
+        <button onclick="closeModal()">Закрыть</button>
+    </div>
 </body>
 </html>

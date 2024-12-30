@@ -70,3 +70,15 @@ tr:hover {
 #modal {
     box-sizing: border-box;
 }
+#modal-content {
+    white-space: pre-wrap; /* Перенос строк */
+}
+
+#modal-content h3 { /* Стили для заголовков */
+    margin-top: 1em; /* Отступ сверху */
+    margin-bottom: 0.5em; /* Отступ снизу */
+}
+
+#modal-content strong { /* Стили для жирного текста */
+    font-weight: bold;
+}

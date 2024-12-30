@@ -40,7 +40,11 @@
             modal.style.maxHeight = (window.innerHeight - tableRect.top - 20) + 'px'; //Ограничение по высоте, чтобы не выходило за пределы окна
 
             document.getElementById('modal-title').textContent = `AI Аналитика для ${name} (${symbol})`;
-            document.getElementById('modal-content').textContent = data.content;
+            const modalContent = document.getElementById('modal-content');
+            modalContent.innerHTML = data.content
+                .replace(/### (.*?)\n/g, '<h3>$1</h3>') // Заголовки
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Жирный текст
+
             modal.style.display = 'block';
 
         }

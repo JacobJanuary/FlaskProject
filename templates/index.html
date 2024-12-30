@@ -9,35 +9,48 @@
         /* Встроенные стили лучше убрать, чтобы избежать конфликтов */
     </style>
     <script>
-  function showAIAnalytics(name, symbol) {
+function showAIAnalytics(name, symbol) {
     const modal = document.getElementById('modal');
     const loading = document.getElementById('loading');
     const modalContent = document.getElementById('modal-content');
     const modalTitle = document.getElementById('modal-title');
 
     modalTitle.textContent = `AI Аналитика для ${name} (${symbol})`;
-    modalContent.textContent = ""; // Очищаем предыдущий контент
-    loading.style.display = 'block'; // Показываем индикатор загрузки
-    modal.style.display = 'block'; // Показываем модальное окно
+    modalContent.textContent = "";
+    loading.style.display = 'block';
+    modal.style.display = 'block';
 
     fetch('/', {
-        // ... (fetch options)
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'name=' + encodeURIComponent(name) + '&symbol=' + encodeURIComponent(symbol)
     })
     .then(response => {
-       // ...
+        if (!response.ok) {
+            // Обрабатываем HTTP ошибки (например, 500 Internal Server Error)
+            return response.text().then(text => { // Получаем текст ошибки с сервера
+                throw new Error(`HTTP error ${response.status}: ${text}`); // Бросаем ошибку с текстом
+            });
+        }
+        return response.json(); // Парсим JSON только если response.ok
     })
     .then(data => {
-        loading.style.display = 'none'; // Скрываем индикатор загрузки после получения ответа
-        if (data.error) {
+        loading.style.display = 'none';
+        if (data && data.error) { // Проверяем data на null/undefined и наличие свойства error
             alert('Ошибка: ' + data.error);
-        } else {
+        } else if (data && data.content) { // Проверяем data на null/undefined и наличие свойства content
             modalContent.textContent = data.content;
+        } else {
+            console.error("Invalid data received from server:", data); // Выводим в консоль для отладки
+            alert("Некорректный ответ от сервера."); // Сообщение пользователю
         }
     })
     .catch(error => {
-        loading.style.display = 'none'; // Скрываем индикатор загрузки в случае ошибки
+        loading.style.display = 'none';
         console.error('Ошибка fetch:', error);
-        alert('Произошла ошибка при выполнении запроса: ' + error.message);
+        alert('Произошла ошибка при выполнении запроса: ' + error.message); // Показываем сообщение об ошибке пользователю
     });
 }
 

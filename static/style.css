@@ -67,3 +67,23 @@ tr:hover {
     visibility: visible;
     opacity: 1;
 }
+
+#modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border: 1px solid black;
+    max-width: 90vw; /* Максимальная ширина: 90% ширины окна браузера */
+    max-height: 80vh; /* Максимальная высота: 80% высоты окна браузера */
+    overflow-y: auto; /* Добавляем прокрутку по вертикали, если контент не помещается */
+    overflow-x: auto; /* Добавляем прокрутку по горизонтали, если контент не помещается */
+    z-index: 1000;
+}
+#modal-content {
+    white-space: pre-wrap; /* Разрешаем перенос строк */
+    word-wrap: break-word; /* Разрешаем разрыв длинных слов */
+}

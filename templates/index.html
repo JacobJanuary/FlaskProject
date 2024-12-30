@@ -3,163 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <title>Криптовалюты с ростом объема</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> {# <-- Обязательно проверьте эту строку! #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {# <-- Обязательно проверьте эту строку! #}
     <style>
-      /* Встроенные стили лучше убрать, чтобы избежать конфликтов */
+        /* Встроенные стили лучше убрать, чтобы избежать конфликтов */
     </style>
-<script>
-        function showAIAnalytics(name, symbol) {
-            console.log("Запрос AI аналитики для:", name, symbol);
-            fetch('/', { // Отправляем POST запрос на корень сайта
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'name=' + encodeURIComponent(name) + '&symbol=' + encodeURIComponent(symbol)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => {throw new Error(err.error || 'Ошибка запроса')});
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.error) {
-                    alert('Ошибка: ' + data.error);
-                } else {
-                    document.getElementById('modal-title').textContent = `AI Аналитика для ${name} (${symbol})`;
-                    document.getElementById('modal-content').textContent = data.content;
-                    document.getElementById('modal').style.display = 'block';
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка fetch:', error);
-                alert('Произошла ошибка при выполнении запроса: ' + error.message);
-            });
+    <script>
+  function showAIAnalytics(name, symbol) {
+    const modal = document.getElementById('modal');
+    const loading = document.getElementById('loading');
+    const modalContent = document.getElementById('modal-content');
+    const modalTitle = document.getElementById('modal-title');
+
+    modalTitle.textContent = `AI Аналитика для ${name} (${symbol})`;
+    modalContent.textContent = ""; // Очищаем предыдущий контент
+    loading.style.display = 'block'; // Показываем индикатор загрузки
+    modal.style.display = 'block'; // Показываем модальное окно
+
+    fetch('/', {
+        // ... (fetch options)
+    })
+    .then(response => {
+       // ...
+    })
+    .then(data => {
+        loading.style.display = 'none'; // Скрываем индикатор загрузки после получения ответа
+        if (data.error) {
+            alert('Ошибка: ' + data.error);
+        } else {
+            modalContent.textContent = data.content;
         }
+    })
+    .catch(error => {
+        loading.style.display = 'none'; // Скрываем индикатор загрузки в случае ошибки
+        console.error('Ошибка fetch:', error);
+        alert('Произошла ошибка при выполнении запроса: ' + error.message);
+    });
+}
 
         function closeModal() {
             document.getElementById('modal').style.display = 'none';
         }
 
-function sortTable(n, type) {
-  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-  table = document.getElementById("cryptoTable");
-  switching = true;
-  // Устанавливаем направление сортировки по умолчанию: по возрастанию
-  dir = "asc";
-  /* Создаем цикл, который будет продолжаться до тех пор, пока не будет выполнена сортировка: */
-  while (switching) {
-    // Начинаем с того, что переключение не требуется:
-    switching = false;
-    rows = table.rows;
-    /* Проходим по всем строкам таблицы (кроме заголовка): */
-    for (i = 1; i < (rows.length - 1); i++) {
-      // Начинаем с того, что переключение не требуется:
-      shouldSwitch = false;
-      /* Получаем два элемента, которые нужно сравнить, один из текущей строки, а другой из следующей: */
-      x = rows[i].getElementsByTagName("TD")[n];
-      y = rows[i + 1].getElementsByTagName("TD")[n];
+        function sortTable(n, type) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("cryptoTable");
+            switching = true;
+            // Устанавливаем направление сортировки по умолчанию: по возрастанию
+            dir = "asc";
+            /* Создаем цикл, который будет продолжаться до тех пор, пока не будет выполнена сортировка: */
+            while (switching) {
+                // Начинаем с того, что переключение не требуется:
+                switching = false;
+                rows = table.rows;
+                /* Проходим по всем строкам таблицы (кроме заголовка): */
+                for (i = 1; i < (rows.length - 1); i++) {
+                    // Начинаем с того, что переключение не требуется:
+                    shouldSwitch = false;
+                    /* Получаем два элемента, которые нужно сравнить, один из текущей строки, а другой из следующей: */
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
 
-      // Проверяем тип данных для корректного сравнения
-      if (type == "number") {
-        x = Number(x.innerHTML);
-        y = Number(y.innerHTML);
-        if (isNaN(x)) x= -Infinity // обработка N/A
-        if (isNaN(y)) y= -Infinity // обработка N/A
-      } else if (type == "percent") {
-        x = Number(x.innerHTML.replace("%", ""));
-        y = Number(y.innerHTML.replace("%", ""));
-        if (isNaN(x)) x= -Infinity // обработка N/A
-        if (isNaN(y)) y= -Infinity // обработка N/A
-      } else if (type == "string"){
-        x = x.innerHTML.toLowerCase();
-        y = y.innerHTML.toLowerCase();
-      }
+                    // Проверяем тип данных для корректного сравнения
+                    if (type == "number") {
+                        x = Number(x.innerHTML);
+                        y = Number(y.innerHTML);
+                        if (isNaN(x)) x = -Infinity // обработка N/A
+                        if (isNaN(y)) y = -Infinity // обработка N/A
+                    } else if (type == "percent") {
+                        x = Number(x.innerHTML.replace("%", ""));
+                        y = Number(y.innerHTML.replace("%", ""));
+                        if (isNaN(x)) x = -Infinity // обработка N/A
+                        if (isNaN(y)) y = -Infinity // обработка N/A
+                    } else if (type == "string") {
+                        x = x.innerHTML.toLowerCase();
+                        y = y.innerHTML.toLowerCase();
+                    }
 
-      /* Проверяем, нужно ли менять строки местами, в зависимости от направления сортировки: */
-      if (dir == "asc") {
-        if (x > y) {
-          // Если x должен идти после y, помечаем как переключение и выходим из цикла:
-          shouldSwitch = true;
-          break;
+                    /* Проверяем, нужно ли менять строки местами, в зависимости от направления сортировки: */
+                    if (dir == "asc") {
+                        if (x > y) {
+                            // Если x должен идти после y, помечаем как переключение и выходим из цикла:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x < y) {
+                            // Если x должен идти перед y, помечаем как переключение и выходим из цикла:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /* Если нужно выполнить переключение, меняем строки местами и помечаем, что переключение было выполнено: */
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    // Каждый раз при выполнении переключения увеличиваем счетчик:
+                    switchcount++;
+                } else {
+                    /* Если переключение не было выполнено и направление "asc", устанавливаем направление "desc" и снова запускаем цикл while, что бы отсортировать в обратном порядке: */
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
         }
-      } else if (dir == "desc") {
-        if (x < y) {
-          // Если x должен идти перед y, помечаем как переключение и выходим из цикла:
-          shouldSwitch = true;
-          break;
-        }
-      }
-    }
-    if (shouldSwitch) {
-      /* Если нужно выполнить переключение, меняем строки местами и помечаем, что переключение было выполнено: */
-      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-      switching = true;
-      // Каждый раз при выполнении переключения увеличиваем счетчик:
-      switchcount++;
-    } else {
-      /* Если переключение не было выполнено и направление "asc", устанавливаем направление "desc" и снова запускаем цикл while, что бы отсортировать в обратном порядке: */
-      if (switchcount == 0 && dir == "asc") {
-        dir = "desc";
-        switching = true;
-      }
-    }
-  }
-}
-</script>
+    </script>
 </head>
 <body>
-    <h1>Криптовалюты с ростом объема (>= 20%) и без существенного роста (падения) цены за {% if time_difference %}{% if time_difference.days > 0 %}{{ time_difference.days }} дн. {% endif %}{% if time_difference.seconds // 3600 > 0 %}{{ time_difference.seconds // 3600 }} ч. {% endif %}{% if (time_difference.seconds % 3600) // 60 > 0 %}{{ (time_difference.seconds % 3600) // 60 }} мин.{% endif %}{% else %}недостаточно данных{% endif %}</h1>
-    {% if crypto_data %}
-    <table id="cryptoTable">
-        <thead>
-            <tr>
-                <th class="sortable" onclick="sortTable(0, 'string')">Name</th>
-                <th class="sortable" onclick="sortTable(1, 'string')">Symbol</th>
-                <th class="sortable" onclick="sortTable(2, 'number')">Rank</th>
-                <th class="sortable" onclick="sortTable(3, 'number')">Текущий объем</th>
-                <th class="sortable" onclick="sortTable(4, 'percent')">Прирост объема (%)</th>
-                <th class="sortable" onclick="sortTable(5, 'number')">Текущая цена</th>
-                <th class="sortable" onclick="sortTable(6, 'percent')">Изменение цены (%)</th>
-                <th>Рост объема</th>
-                <th>Ссылка на CoinMarketCap</th>
-                <th>AI Аналитика</th>
-                <th>AI Фонды</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for crypto in crypto_data %}
-            <tr>
-                <td>{{ crypto.name }}</td>
-                <td>{{ crypto.symbol }}</td>
-                <td>{{ crypto.rank }}</td>
-                <td>{{ crypto.current_volume }}</td>
-                <td>{{ crypto.volume_increase|round(2) }}%</td>
-                <td>{{ crypto.current_price }}</td>
-                <td {% if crypto.price_change > 0 %}class="positive-change"{% elif crypto.price_change < 0 %}class="negative-change"{% endif %}>{{ crypto.price_change|round(2) }}%</td>
-                <td>
-                    <div class="tooltip">
-                        {% for i in range(crypto.periods_of_growth) %}★{% endfor %}
-                        <span class="tooltiptext">За {% if crypto.time_of_growth.days > 0 %}{{ crypto.time_of_growth.days }} дн. {% endif %}{% if crypto.time_of_growth.seconds // 3600 > 0 %}{{ crypto.time_of_growth.seconds // 3600 }} ч. {% endif %}{% if (crypto.time_of_growth.seconds % 3600) // 60 > 0 %}{{ (crypto.time_of_growth.seconds % 3600) // 60 }} мин.{% endif %} объем вырос на {{ crypto.average_volume_increase_percentage|round(2) }}%</span>
-                    </div>
-                </td>
-                <td><a href="https://coinmarketcap.com/currencies/{{ crypto.name|lower|replace(' ', '-') }}" target="_blank">Ссылка</a></td>
-                <td><button onclick="showAIAnalytics('{{ crypto.name }}', '{{ crypto.symbol }}')">AI Аналитика</button></td>
-                <td><button onclick="showAIFunds()">AI Фонды</button></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-        <p>Всего криптовалют с ростом объема: {{ crypto_data|length }}</p>
-    {% else %}
-    <p>Нет данных о криптовалютах с ростом объема более 10%.</p>
-    {% endif %}
+<h1>Криптовалюты с ростом объема (>= 20%) и без существенного роста (падения) цены за {% if time_difference %}{% if
+    time_difference.days > 0 %}{{ time_difference.days }} дн. {% endif %}{% if time_difference.seconds // 3600 > 0 %}{{
+    time_difference.seconds // 3600 }} ч. {% endif %}{% if (time_difference.seconds % 3600) // 60 > 0 %}{{
+    (time_difference.seconds % 3600) // 60 }} мин.{% endif %}{% else %}недостаточно данных{% endif %}</h1>
+{% if crypto_data %}
+<table id="cryptoTable">
+    <thead>
+    <tr>
+        <th class="sortable" onclick="sortTable(0, 'string')">Name</th>
+        <th class="sortable" onclick="sortTable(1, 'string')">Symbol</th>
+        <th class="sortable" onclick="sortTable(2, 'number')">Rank</th>
+        <th class="sortable" onclick="sortTable(3, 'number')">Текущий объем</th>
+        <th class="sortable" onclick="sortTable(4, 'percent')">Прирост объема (%)</th>
+        <th class="sortable" onclick="sortTable(5, 'number')">Текущая цена</th>
+        <th class="sortable" onclick="sortTable(6, 'percent')">Изменение цены (%)</th>
+        <th>Рост объема</th>
+        <th>Ссылка на CoinMarketCap</th>
+        <th>AI Аналитика</th>
+        <th>AI Фонды</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for crypto in crypto_data %}
+    <tr>
+        <td>{{ crypto.name }}</td>
+        <td>{{ crypto.symbol }}</td>
+        <td>{{ crypto.rank }}</td>
+        <td>{{ crypto.current_volume }}</td>
+        <td>{{ crypto.volume_increase|round(2) }}%</td>
+        <td>{{ crypto.current_price }}</td>
+        <td {% if crypto.price_change> 0 %}class="positive-change"{% elif crypto.price_change < 0
+            %}class="negative-change"{% endif %}>{{ crypto.price_change|round(2) }}%
+        </td>
+        <td>
+            <div class="tooltip">
+                {% for i in range(crypto.periods_of_growth) %}★{% endfor %}
+                <span class="tooltiptext">За {% if crypto.time_of_growth.days > 0 %}{{ crypto.time_of_growth.days }} дн. {% endif %}{% if crypto.time_of_growth.seconds // 3600 > 0 %}{{ crypto.time_of_growth.seconds // 3600 }} ч. {% endif %}{% if (crypto.time_of_growth.seconds % 3600) // 60 > 0 %}{{ (crypto.time_of_growth.seconds % 3600) // 60 }} мин.{% endif %} объем вырос на {{ crypto.average_volume_increase_percentage|round(2) }}%</span>
+            </div>
+        </td>
+        <td><a href="https://coinmarketcap.com/currencies/{{ crypto.name|lower|replace(' ', '-') }}" target="_blank">Ссылка</a>
+        </td>
+        <td>
+            <button onclick="showAIAnalytics('{{ crypto.name }}', '{{ crypto.symbol }}')">AI Аналитика</button>
+        </td>
+        <td>
+            <button onclick="showAIFunds()">AI Фонды</button>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<p>Всего криптовалют с ростом объема: {{ crypto_data|length }}</p>
+{% else %}
+<p>Нет данных о криптовалютах с ростом объема более 10%.</p>
+{% endif %}
 
-    <div id="modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border: 1px solid black; max-height: 80vh; overflow-y: auto; z-index: 1000;">
-        <h3 id="modal-title"></h3>
-        <pre id="modal-content"></pre>
-        <button onclick="closeModal()">Закрыть</button>
+<div id="modal"
+     style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border: 1px solid black; max-height: 80vh; overflow-y: auto; z-index: 1000;">
+    <div id="loading" style="display: none; text-align: center;">
+        <p>Ожидайте, ИИ думает...</p>
+        <div class="loader"></div>
+        <style>
+            .loader {
+                border: 16px solid #f3f3f3; /* Light grey */
+                border-top: 16px solid #3498db; /* Blue */
+                border-radius: 50%;
+                width: 120px;
+                height: 120px;
+                animation: spin 2s linear infinite;
+                margin: 0 auto; /* Центрирование */
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
     </div>
+
+    <h3 id="modal-title"></h3>
+    <pre id="modal-content"></pre>
+    <button onclick="closeModal()">Закрыть</button>
+</div>
 </body>
 </html>

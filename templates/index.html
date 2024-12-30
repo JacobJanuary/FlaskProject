@@ -39,7 +39,7 @@
             modal.style.width = tableRect.width + 'px';
             modal.style.maxHeight = (window.innerHeight - tableRect.top - 20) + 'px'; //Ограничение по высоте, чтобы не выходило за пределы окна
 
-            document.getElementById('modal-title').textContent = `AI Аналитика для <span class="math-inline">\{name\} \(</span>{symbol})`;
+            document.getElementById('modal-title').textContent = `AI Аналитика для ${name} (${symbol})`;
             document.getElementById('modal-content').textContent = data.content;
             modal.style.display = 'block';
 

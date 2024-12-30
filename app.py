@@ -37,8 +37,14 @@ def get_grok_analytics(name, symbol):
             max_tokens=128000,
             messages=[{"role": "user", "content": prompt}]
         )
+        # Correct way to handle the response
+        if message and hasattr(message, 'content') and hasattr(message.content, 'text'):
+            content = message.content.text
+            return {"content": content}
+        else:
+            print(f"Unexpected response structure: {message}")
+            return {"error": "Unexpected response from API"}
 
-        return {"content": message.content}
     except Exception as e:
         print(f"Ошибка при запросе к API Grok: {e}")
         traceback.print_exc()

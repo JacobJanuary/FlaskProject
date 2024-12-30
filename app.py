@@ -1,9 +1,9 @@
-import traceback
-
-from flask import Flask, render_template, request, jsonify
 import sqlite3
-from anthropic import Anthropic
+import traceback
 from datetime import datetime, timedelta
+
+from anthropic import Anthropic
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
@@ -20,7 +20,7 @@ def format_price(price):
     return "N/A"
 
 
-XAI_API_KEY = "xai-AEbygKMNvz46KLqCszO6UEp3RDpc0DyWmwLpwOnNlM18BWF0rUwuHGPVSUykOxAyRuGKoT48IzCOSvvm" # Получаем ключ из переменной окружения
+XAI_API_KEY = "xai-AEbygKMNvz46KLqCszO6UEp3RDpc0DyWmwLpwOnNlM18BWF0rUwuHGPVSUykOxAyRuGKoT48IzCOSvvm"  # Получаем ключ из переменной окружения
 
 
 def get_grok_analytics(name, symbol):

@@ -10,17 +10,32 @@
     </style>
     <script>
         function showAIAnalytics(name, symbol) {
-                const modal = document.getElementById('modal');
+            const modal = document.getElementById('modal');
     const modalLoading = document.getElementById('modal-loading');
     const modalContent = document.getElementById('modal-content');
 
-    // Показываем модальное окно и индикатор загрузки
     modal.style.display = 'block';
     modalLoading.style.display = 'block';
     modalContent.style.display = 'none';
 
-            console.log("Запрос AI аналитики для:", name, symbol);
-            fetch('/', { // Отправляем POST запрос на корень сайта
+            const tableContainer = document.getElementById('table-container');
+            const tableRect = tableContainer.getBoundingClientRect();
+            const tableWidth = tableContainer.clientWidth;
+
+            const modalStyle = window.getComputedStyle(modal);
+            const modalPaddingLeft = parseInt(modalStyle.paddingLeft, 10);
+            const modalPaddingRight = parseInt(modalStyle.paddingRight, 10);
+            const modalBorderLeft = parseInt(modalStyle.borderLeftWidth, 10);
+            const modalBorderRight = parseInt(modalStyle.borderRightWidth, 10);
+
+            modal.style.top = (tableRect.top + window.scrollY) + 'px';
+            modal.style.left = tableRect.left + 'px';
+            modal.style.width = (tableWidth - modalPaddingLeft - modalPaddingRight - modalBorderLeft - modalBorderRight) + 'px';
+            modal.style.maxHeight = (window.innerHeight - tableRect.top - 20) + 'px';
+
+            document.getElementById('modal-title').textContent = `AI Аналитика для ${name} (${symbol})`;
+
+            fetch('/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -35,35 +50,23 @@
                     }
                     return response.json();
                 })
-.then(data => {
+                .then(data => {
         if (data.error) {
-            modal.style.display = 'none'; // Скрываем модальное окно при ошибке
             alert('Ошибка: ' + data.error);
+            modal.style.display = 'none';
         } else {
             modalLoading.style.display = 'none';
             modalContent.style.display = 'block';
 
-            const tableContainer = document.getElementById('table-container');
-            const tableRect = tableContainer.getBoundingClientRect();
-
-            modal.style.top = (tableRect.top + window.scrollY) + 'px';
-            modal.style.left = tableRect.left + 'px';
-            modal.style.width = tableRect.width + 'px';
-            modal.style.maxHeight = (window.innerHeight - tableRect.top - 20) + 'px'; //Ограничение по высоте, чтобы не выходило за пределы окна
-
-            document.getElementById('modal-title').textContent = `AI Аналитика для ${name} (${symbol})`;
-            const modalContent = document.getElementById('modal-content');
             modalContent.innerHTML = data.content
-                .replace(/### (.*?)\n/g, '<h3>$1</h3>') // Заголовки
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Жирный текст
-
-            modal.style.display = 'block';
-
+                .replace(/### (.*?)\n/g, '<h3>$1</h3>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         }
     })
                 .catch(error => {
                     console.error('Ошибка fetch:', error);
                     alert('Произошла ошибка при выполнении запроса: ' + error.message);
+                    modal.style.display = 'none';
                 });
         }
 

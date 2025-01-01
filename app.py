@@ -19,7 +19,9 @@ def format_price(price):
         return f"{price:.2f}"
     return "N/A"
 
+
 XAI_API_KEY = "xai-AEbygKMNvz46KLqCszO6UEp3RDpc0DyWmwLpwOnNlM18BWF0rUwuHGPVSUykOxAyRuGKoT48IzCOSvvm"  # Получаем ключ из переменной окружения
+
 
 def get_grok_analytics(name, symbol):
     if not XAI_API_KEY:

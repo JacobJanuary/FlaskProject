@@ -67,9 +67,11 @@ tr:hover {
     visibility: visible;
     opacity: 1;
 }
+
 #modal {
     box-sizing: border-box;
 }
+
 #modal-content {
     white-space: pre-wrap; /* Перенос строк */
 }
@@ -94,6 +96,10 @@ tr:hover {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }

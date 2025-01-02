@@ -11,27 +11,14 @@
     <script>
         function showAIAnalytics(name, symbol) {
             const modal = document.getElementById('modal');
-    const modalLoading = document.getElementById('modal-loading');
-    const modalContent = document.getElementById('modal-content');
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalLoading = document.getElementById('modal-loading');
+            const modalContent = document.getElementById('modal-content');
 
-    modal.style.display = 'block';
-    modalLoading.style.display = 'block';
-    modalContent.style.display = 'none';
-
-            const tableContainer = document.getElementById('table-container');
-            const tableRect = tableContainer.getBoundingClientRect();
-            const tableWidth = tableContainer.clientWidth;
-
-            const modalStyle = window.getComputedStyle(modal);
-            const modalPaddingLeft = parseInt(modalStyle.paddingLeft, 10);
-            const modalPaddingRight = parseInt(modalStyle.paddingRight, 10);
-            const modalBorderLeft = parseInt(modalStyle.borderLeftWidth, 10);
-            const modalBorderRight = parseInt(modalStyle.borderRightWidth, 10);
-
-            modal.style.top = (tableRect.top + window.scrollY) + 'px';
-            modal.style.left = tableRect.left + 'px';
-            modal.style.width = (tableWidth - modalPaddingLeft - modalPaddingRight - modalBorderLeft - modalBorderRight) + 'px';
-            modal.style.maxHeight = (window.innerHeight - tableRect.top - 20) + 'px';
+            modal.classList.add('show'); // Показываем модальное окно
+            modalOverlay.style.display = 'block'; // Показываем оверлей
+            modalLoading.style.display = 'block';
+            modalContent.style.display = 'none';
 
             document.getElementById('modal-title').textContent = `AI Аналитика для ${name} (${symbol})`;
 
@@ -51,18 +38,18 @@
                     return response.json();
                 })
                 .then(data => {
-        if (data.error) {
-            alert('Ошибка: ' + data.error);
-            modal.style.display = 'none';
-        } else {
-            modalLoading.style.display = 'none';
-            modalContent.style.display = 'block';
+                    if (data.error) {
+                        alert('Ошибка: ' + data.error);
+                        modal.style.display = 'none';
+                    } else {
+                        modalLoading.style.display = 'none';
+                        modalContent.style.display = 'block';
 
-            modalContent.innerHTML = data.content
-                .replace(/### (.*?)\n/g, '<h3>$1</h3>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        }
-    })
+                        modalContent.innerHTML = data.content
+                            .replace(/### (.*?)\n/g, '<h3>$1</h3>')
+                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    }
+                })
                 .catch(error => {
                     console.error('Ошибка fetch:', error);
                     alert('Произошла ошибка при выполнении запроса: ' + error.message);
@@ -71,7 +58,11 @@
         }
 
         function closeModal() {
-            document.getElementById('modal').style.display = 'none';
+            const modal = document.getElementById('modal');
+            const modalOverlay = document.getElementById('modal-overlay');
+
+            modal.classList.remove('show'); // Скрываем модальное окно
+            modalOverlay.style.display = 'none'; // Скрываем оверлей
         }
 
         function sortTable(n, type) {
@@ -148,64 +139,67 @@
     (time_difference.seconds % 3600) // 60 }} мин.{% endif %}{% else %}недостаточно данных{% endif %}</h1>
 {% if crypto_data %}
 <div id="table-container">
-<table id="cryptoTable">
-    <thead>
-    <tr>
-        <th class="sortable" onclick="sortTable(0, 'string')">Name</th>
-        <th class="sortable" onclick="sortTable(1, 'string')">Symbol</th>
-        <th class="sortable" onclick="sortTable(2, 'number')">Rank</th>
-        <th class="sortable" onclick="sortTable(3, 'number')">Текущий объем</th>
-        <th class="sortable" onclick="sortTable(4, 'percent')">Прирост объема (%)</th>
-        <th class="sortable" onclick="sortTable(5, 'number')">Текущая цена</th>
-        <th class="sortable" onclick="sortTable(6, 'percent')">Изменение цены (%)</th>
-        <th>Рост объема</th>
-        <th>Ссылка на CoinMarketCap</th>
-        <th>AI Аналитика</th>
-        <th>AI Фонды</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for crypto in crypto_data %}
-    <tr>
-        <td>{{ crypto.name }}</td>
-        <td>{{ crypto.symbol }}</td>
-        <td>{{ crypto.rank }}</td>
-        <td>{{ crypto.current_volume }}</td>
-        <td>{{ crypto.volume_increase|round(2) }}%</td>
-        <td>{{ crypto.current_price }}</td>
-        <td {% if crypto.price_change> 0 %}class="positive-change"{% elif crypto.price_change < 0
-            %}class="negative-change"{% endif %}>{{ crypto.price_change|round(2) }}%
-        </td>
-        <td>
-            <div class="tooltip">
-                {% for i in range(crypto.periods_of_growth) %}★{% endfor %}
-                <span class="tooltiptext">За {% if crypto.time_of_growth.days > 0 %}{{ crypto.time_of_growth.days }} дн. {% endif %}{% if crypto.time_of_growth.seconds // 3600 > 0 %}{{ crypto.time_of_growth.seconds // 3600 }} ч. {% endif %}{% if (crypto.time_of_growth.seconds % 3600) // 60 > 0 %}{{ (crypto.time_of_growth.seconds % 3600) // 60 }} мин.{% endif %} объем вырос на {{ crypto.average_volume_increase_percentage|round(2) }}%</span>
-            </div>
-        </td>
-        <td><a href="https://coinmarketcap.com/currencies/{{ crypto.name|lower|replace(' ', '-') }}" target="_blank">Ссылка</a>
-        </td>
-        <td>
-            <button onclick="showAIAnalytics('{{ crypto.name }}', '{{ crypto.symbol }}')">AI Аналитика</button>
-        </td>
-        <td>
-            <button onclick="showAIFunds()">AI Фонды</button>
-        </td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
+    <table id="cryptoTable">
+        <thead>
+        <tr>
+            <th class="sortable" onclick="sortTable(0, 'string')">Name</th>
+            <th class="sortable" onclick="sortTable(1, 'string')">Symbol</th>
+            <th class="sortable" onclick="sortTable(2, 'number')">Rank</th>
+            <th class="sortable" onclick="sortTable(3, 'number')">Текущий объем</th>
+            <th class="sortable" onclick="sortTable(4, 'percent')">Прирост объема (%)</th>
+            <th class="sortable" onclick="sortTable(5, 'number')">Текущая цена</th>
+            <th class="sortable" onclick="sortTable(6, 'percent')">Изменение цены (%)</th>
+            <th>Рост объема</th>
+            <th>Ссылка на CoinMarketCap</th>
+            <th>AI Аналитика</th>
+            <th>AI Фонды</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for crypto in crypto_data %}
+        <tr>
+            <td>{{ crypto.name }}</td>
+            <td>{{ crypto.symbol }}</td>
+            <td>{{ crypto.rank }}</td>
+            <td>{{ crypto.current_volume }}</td>
+            <td>{{ crypto.volume_increase|round(2) }}%</td>
+            <td>{{ crypto.current_price }}</td>
+            <td crypto.price_change if {%> 0 %}class="positive-change"{% elif crypto.price_change < 0
+                %}class="negative-change"{% endif %}>{{ crypto.price_change|round(2) }}%
+            </td>
+            <td>
+                <div class="tooltip">
+                    {% for i in range(crypto.periods_of_growth) %}★{% endfor %}
+                    <span class="tooltiptext">За {% if crypto.time_of_growth.days > 0 %}{{ crypto.time_of_growth.days }} дн. {% endif %}{% if crypto.time_of_growth.seconds // 3600 > 0 %}{{ crypto.time_of_growth.seconds // 3600 }} ч. {% endif %}{% if (crypto.time_of_growth.seconds % 3600) // 60 > 0 %}{{ (crypto.time_of_growth.seconds % 3600) // 60 }} мин.{% endif %} объем вырос на {{ crypto.average_volume_increase_percentage|round(2) }}%</span>
+                </div>
+            </td>
+            <td><a href="https://coinmarketcap.com/currencies/{{ crypto.name|lower|replace(' ', '-') }}"
+                   target="_blank">Ссылка</a>
+            </td>
+            <td>
+                <button onclick="showAIAnalytics('{{ crypto.name }}', '{{ crypto.symbol }}')">AI Аналитика</button>
+            </td>
+            <td>
+                <button onclick="showAIFunds()">AI Фонды</button>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 </div>
 <p>Всего криптовалют с ростом объема: {{ crypto_data|length }}</p>
 {% else %}
 <p>Нет данных о криптовалютах с ростом объема более 10%.</p>
 {% endif %}
 
-<div id="modal" style="display: none; position: absolute; background-color: white; padding: 20px; border: 1px solid black; overflow-y: auto; z-index: 1000;">
+<div class="modal-overlay" id="modal-overlay"></div>
+<div class="modal" id="modal">
     <h3 id="modal-title"></h3>
-    <div id="modal-loading" style="text-align: center;">
-        <div class="loader"></div> <p>ИИ анализирует информацию. Подождите...</p>
+    <div class="modal-loading" id="modal-loading">
+        <div class="loader"></div>
+        <p>ИИ анализирует информацию. Подождите...</p>
     </div>
-    <div id="modal-content" style="display: none;"></div>
+    <div class="modal-content" id="modal-content"></div>
     <button onclick="closeModal()">Закрыть</button>
 </div>
 </body>

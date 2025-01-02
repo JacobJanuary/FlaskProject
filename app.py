@@ -56,8 +56,6 @@ def get_grok_analytics(name, symbol):
         print(f"Ошибка при запросе к API Grok: {e}")
         traceback.print_exc()
         return {"error": str(e)}
-
-
 @app.route("/", methods=["GET", "POST"])
 def index():
     try:

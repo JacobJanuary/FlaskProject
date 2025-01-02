@@ -1,8 +1,8 @@
+import requests
 import sqlite3
+import os
 import time
 from datetime import datetime
-
-import requests
 from dotenv import load_dotenv
 
 load_dotenv()

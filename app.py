@@ -7,7 +7,6 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-
 def format_volume(volume):
     if volume is not None:
         return f"{volume / 1000000:.2f} млн"
